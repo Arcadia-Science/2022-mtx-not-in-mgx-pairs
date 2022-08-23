@@ -11,7 +11,7 @@ SAMPLES = metadata['sample_name'].unique().tolist()                      # make 
 KSIZES = [21, 31, 51]                                                    # create a list of k-mer sizes for the workflow
 
 rule all:
-    input: expand("outputs/sourmash_sketch_subtract/{sample}_k{ksize}.sig", sample = SAMPLES, ksize = KSIZE)
+    input: expand("outputs/sourmash_sketch_subtract/{sample}_k{ksize}.sig", sample = SAMPLES, ksize = KSIZES)
 
 rule sourmash_sketch:
     """
@@ -33,15 +33,20 @@ rule calculate_mtx_not_in_mgx:
     https://github.com/sourmash-bio/sourmash/blob/latest/src/sourmash/sig/__main__.py
     Doing this in a python script is the easiest way to map pairs of samples to each other within the snakemake workflow.
     
-    The "run" directive doesn't allow a run to have a conda environment; 
+    The run directive doesn't allow a run to have a conda environment; 
     therefore the run environment for this code is specified in environment.yml
     """
     input:
-        metadata = "inputs/metadata-paired-mgx-mtx.tsv",
-        sigs = expand("outputs/sourmash_sketch/{run_accession}.sig", run_accession = RUN_ACCESSIONS) 
-    output: expand("outputs/sourmash_sketch_subtract/{sample}_k{{ksize}}.sig", sample = SAMPLES)
+        metadata = 'inputs/metadata-paired-mgx-mtx.tsv',
+        sigs = expand('outputs/sourmash_sketch/{run_accession}.sig', run_accession = RUN_ACCESSIONS) 
+    output:
+        sigs = expand("outputs/sourmash_sketch_subtract/{sample}_k{{ksize}}.sig", sample = SAMPLES)
     run:
         ksize = wildcards.ksize
+        # read in metadata dataframe to derive sample pairs
+        metadata = pd.read_csv(input.metadata, sep = "\t") # read in metadata as pandas df
+        metadata = metadata.reset_index()  # make sure indexes pair with number of rows
+        
         for index, row in metadata.iterrows():
             # grab the run accessions for a given paired metagenome and metatranscriptome
             mtx_run_accession = row['mtx_run_accession']
@@ -80,7 +85,10 @@ rule calculate_mtx_not_in_mgx:
             mtx_subtract_sigobj.name = name
             
             # create output sig file name
-            sig_filename = os.path.join('outputs/sourmash_sketch_subtract/' + name + "_k" + ksize + ".sig"
+            sig_filename = os.path.join('outputs/sourmash_sketch_subtract/' + name + "_k" + ksize + ".sig")
             # write sig to file
             with sourmash.sourmash_args.FileOutput(sig_filename, 'wt') as fp:
                 sourmash.save_signatures([mtx_subtract_sigobj], fp=fp)
+
+
+
