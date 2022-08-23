@@ -50,6 +50,8 @@ git clone git@github.com:Arcadia-Science/2022-mtx-not-in-mgx-pairs.git
 cd 2022-mtx-not-in-mgx-pairs
 ```
 
+Note that there is a [known issue](https://github.com/ncbi/sra-tools/issues/645) with the conda package `sra-tools=2.11.0` that will prevent this workflow from running on Mac operating systems. 
+
 ## Next steps
 
 TBD
