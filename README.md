@@ -12,11 +12,44 @@ Some metagenome and metatranscripome pairs are true pairs that were extracted fr
 
 ## Getting started with this repository
 
-TBD
+This repository uses snakemake to run the pipeline and conda to manage software environments and installations.
+You can find operating system-specific instructions for installing miniconda [here](https://docs.conda.io/en/latest/miniconda.html).
+After installing conda and [mamba](https://mamba.readthedocs.io/en/latest/), run the following command to create the pipeline run environment.
 
-### Run environment
+```
+mamba env create -n mtx_mgx --file environment.yml
+conda activate mtx_mgx
+```
 
-This repository was executed on an AWS EC2 instance (Ubuntu 22.04 LTS ami-085284d24fe829cd0, t2.large, 100 GiB root storage)
+To start the pipeline, run:
+```
+snakemake --use-conda -j 2
+```
+
+### Running this repository on AWS
+
+This repository was executed on an AWS EC2 instance (Ubuntu 22.04 LTS ami-085284d24fe829cd0, t2.large, 100 GiB root storage).
+The instance was configured using the following commands:
+
+```
+curl -JLO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh # download the miniconda installation script
+bash Miniconda3-latest-Linux-x86_64.sh # run the miniconda installation script. Accept the license and follow the defaults.
+source ~/.bashrc # source the .bashrc for miniconda to be available in the environment
+
+# configure miniconda channel order
+conda config --add channels defaults 
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda install mamba # install mamba for faster software installation.
+```
+
+Once miniconda is configured, clone the repository and `cd` into it, then follow the instructions in the above section.
+```
+git clone git@github.com:Arcadia-Science/2022-mtx-not-in-mgx-pairs.git
+cd 2022-mtx-not-in-mgx-pairs
+```
+
 ## Next steps
 
 TBD
