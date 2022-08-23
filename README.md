@@ -46,7 +46,7 @@ conda install mamba # install mamba for faster software installation.
 
 Once miniconda is configured, clone the repository and `cd` into it, then follow the instructions in the above section.
 ```
-git clone git@github.com:Arcadia-Science/2022-mtx-not-in-mgx-pairs.git
+git clone https://github.com/Arcadia-Science/2022-mtx-not-in-mgx-pairs.git
 cd 2022-mtx-not-in-mgx-pairs
 ```
 
