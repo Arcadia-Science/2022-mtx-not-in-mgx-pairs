@@ -14,6 +14,9 @@ Some metagenome and metatranscripome pairs are true pairs that were extracted fr
 
 TBD
 
+### Run environment
+
+This repository was executed on an AWS EC2 instance (Ubuntu 22.04 LTS ami-085284d24fe829cd0, t2.large, 100 GiB root storage)
 ## Next steps
 
 TBD

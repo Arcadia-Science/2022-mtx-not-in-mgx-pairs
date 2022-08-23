@@ -1,5 +1,6 @@
 import pandas as pd
-import sourmash # TODO: add sourmash to base environment.yml
+import sourmash
+import os
 
 # create wildcard variables for workflow
 metadata = pd.read_csv("inputs/metadata-paired-mgx-mtx.tsv", sep = "\t") # read in metadata as a pandas dataframe
