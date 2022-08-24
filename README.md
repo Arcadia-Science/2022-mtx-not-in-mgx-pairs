@@ -28,7 +28,7 @@ snakemake --use-conda -j 2
 
 ### Running this repository on AWS
 
-This repository was executed on an AWS EC2 instance (Ubuntu 22.04 LTS ami-085284d24fe829cd0, t2.large, 100 GiB root storage).
+This repository was executed on an AWS EC2 instance (Ubuntu 22.04 LTS ami-085284d24fe829cd0, t2.large, 500 GiB EBS `gp2` root storage).
 The instance was configured using the following commands:
 
 ```
