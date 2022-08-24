@@ -44,7 +44,6 @@ rule calculate_mtx_not_in_mgx:
     run:
         ksize = wildcards.ksize
         # read in metadata dataframe to derive sample pairs
-        metadata = pd.read_csv(input.metadata, sep = "\t") # read in metadata as pandas df
         metadata = metadata.reset_index()  # make sure indexes pair with number of rows
         
         for index, row in metadata.iterrows():
