@@ -15,6 +15,7 @@ Some metagenome and metatranscripome pairs are true pairs that were extracted fr
 This repository uses snakemake to run the pipeline and conda to manage software environments and installations.
 You can find operating system-specific instructions for installing miniconda [here](https://docs.conda.io/en/latest/miniconda.html).
 After installing conda and [mamba](https://mamba.readthedocs.io/en/latest/), run the following command to create the pipeline run environment.
+We installaed Miniconda3 version `py39_4.12.0` and mamba version `0.15.3`.
 
 ```
 mamba env create -n mtx_mgx --file environment.yml
