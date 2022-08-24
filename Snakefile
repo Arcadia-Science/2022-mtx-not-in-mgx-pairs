@@ -91,4 +91,3 @@ rule calculate_mtx_not_in_mgx:
                 sourmash.save_signatures([mtx_subtract_sigobj], fp=fp)
 
 
-
