@@ -80,7 +80,6 @@ rule calculate_mtx_not_in_mgx:
             mtx_subtract_sigobj = sourmash.SourmashSignature(mtx_subtract_mh)
 
             # create a name that reflects the signature contents
-            # name = mtx_run_accession + "-minus-" + mgx_run_accession
             name = row['sample_name']
             mtx_subtract_sigobj.name = name
             
