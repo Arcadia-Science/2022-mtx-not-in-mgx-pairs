@@ -13,7 +13,8 @@ MTX_MINUS_MGX = [x + '-minus-' + y for x, y in zip(MTX, MGX)]            # creat
 
 rule all:
     input: 
-        expand("outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
+        #expand("outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
+        "outputs/sourmash_sig_describe/sourmash_sig_describe.csv"
 
 rule sourmash_sketch:
     """
@@ -27,7 +28,6 @@ rule sourmash_sketch:
     fastq-dump --disable-multithreading --fasta 0 --skip-technical --readids --read-filter pass --dumpbase --split-spot --clip -Z {wildcards.run_accession} | 
         sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name {wildcards.run_accession} -o {output} -
     '''
-
 
 rule calculate_mtx_not_in_mgx:
     """
@@ -44,5 +44,19 @@ rule calculate_mtx_not_in_mgx:
     conda: "envs/sourmash.yml"
     shell:'''
     sourmash sig subtract -k {wildcards.ksize} -o {output} -A {input.mtx_sig} {input.mtx_sig} {input.mgx_sig}
+    '''
+
+rule sourmash_sig_describe_sketches:
+    """
+    Use the sourmash CLI to report detailed information about all sketches, including number of hashes.
+    Output the information as a csv file. 
+    """
+    input: 
+        expand("outputs/sourmash_sketch/{run_accession}.sig", run_accession = RUN_ACCESSIONS),
+        expand("outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
+    output: "outputs/sourmash_sig_describe/sourmash_sig_describe.csv"
+    conda: 'envs/sourmash.yml'
+    shell:'''
+    sourmash sig describe --csv {output} {input}
     '''
 
