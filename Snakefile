@@ -13,8 +13,8 @@ MTX_MINUS_MGX = [x + '-minus-' + y for x, y in zip(MTX, MGX)]            # creat
 
 rule all:
     input: 
-        #expand("outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
-        "outputs/sourmash_sig_describe/sourmash_sig_describe.csv"
+        expand("outputs/sourmash_sketch_subtract_describe/{mtx_minus_mgx}-k{ksize}.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
+        expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS)
 
 rule sourmash_sketch:
     """
@@ -51,10 +51,21 @@ rule sourmash_sig_describe_sketches:
     Use the sourmash CLI to report detailed information about all sketches, including number of hashes.
     Output the information as a csv file. 
     """
-    input: 
-        expand("outputs/sourmash_sketch/{run_accession}.sig", run_accession = RUN_ACCESSIONS),
-        expand("outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
-    output: "outputs/sourmash_sig_describe/sourmash_sig_describe.csv"
+    input: "outputs/sourmash_sketch/{run_accession}.sig"
+    output: "outputs/sourmash_sketch_describe/{run_accession}.csv"
+    conda: 'envs/sourmash.yml'
+    shell:'''
+    sourmash sig describe --csv {output} {input}
+    '''
+
+
+rule sourmash_sig_describe_subtracted_sketches:
+    """
+    Use the sourmash CLI to report detailed information about all sketches, including number of hashes.
+    Output the information as a csv file. 
+    """
+    input: "outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig"
+    output: "outputs/sourmash_sketch_subtract_describe/{mtx_minus_mgx}-k{ksize}.csv"
     conda: 'envs/sourmash.yml'
     shell:'''
     sourmash sig describe --csv {output} {input}
