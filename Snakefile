@@ -9,9 +9,11 @@ MGX = metadata['mgx_run_accession'].unique().tolist()                    # make 
 RUN_ACCESSIONS = MGX + MTX                                               # combine mtx and mgx into one list with all run accessions
 SAMPLES = metadata['sample_name'].unique().tolist()                      # make a list of sample names
 KSIZES = [21, 31, 51]                                                    # create a list of k-mer sizes for the workflow
+MTX_MINUS_MGX = [x + '-minus-' + y for x, y in zip(MTX, MGX)]            # create list that binds mtx to mgx
 
 rule all:
-    input: expand("outputs/sourmash_sketch_subtract/{sample}_k{ksize}.sig", sample = SAMPLES, ksize = KSIZES)
+    input: 
+        expand("outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
 
 rule sourmash_sketch:
     """
@@ -26,66 +28,21 @@ rule sourmash_sketch:
         sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name {wildcards.run_accession} -o {output} -
     '''
 
+
 rule calculate_mtx_not_in_mgx:
     """
-    Use the sourmash python API to subtract metagenome fracminhash sketches from metatranscriptome fracminhash sketches.
-    This for loop re-implements a simplified veresion of the the CLI of sourmash sig subtract.
-    https://github.com/sourmash-bio/sourmash/blob/latest/src/sourmash/sig/__main__.py
-    Doing this in a python script is the easiest way to map pairs of samples to each other within the snakemake workflow.
-    
-    The run directive doesn't allow a run to have a conda environment; 
-    therefore the run environment for this code is specified in environment.yml
+    Use the sourmash CLI to subtract a metagenome sketch from its paired metatranscriptome, retaining metatranscriptome abundances.
+    Snakemake will auto-parse the wildcard mtx_minus_mgx on the "-minus-" string to back-propagate the correct wildcards to m*x_run_accession.
+    Providing the accessions in this way limits the number of ways they can combine;
+    If MTX solved for mtx_run_accession and MGX solved for mgx_run_accession, then snakemake would execute this rule for all combinations of MTX and MGX.
+    Instead, by binding pairs together in MTX_MINUS_MGX, only pairs of metatranscriptomes and metagenomes are subtracted.
     """
     input:
-        metadata = 'inputs/metadata-paired-mgx-mtx.tsv',
-        sigs = expand('outputs/sourmash_sketch/{run_accession}.sig', run_accession = RUN_ACCESSIONS) 
-    output:
-        sigs = expand("outputs/sourmash_sketch_subtract/{sample}_k{{ksize}}.sig", sample = SAMPLES)
-    run:
-        ksize = wildcards.ksize
-        # read in metadata dataframe to derive sample pairs
-        metadata = metadata.reset_index()  # make sure indexes pair with number of rows
-        
-        for index, row in metadata.iterrows():
-            # grab the run accessions for a given paired metagenome and metatranscriptome
-            mtx_run_accession = row['mtx_run_accession']
-            mgx_run_accession = row['mgx_run_accession']
-            # using the run assession, create paths of the signatures
-            mtx_sigfile = os.path.join('outputs/sourmash_sketch', mtx_run_accession + '.sig')
-            mgx_sigfile = os.path.join('outputs/sourmash_sketch', mgx_run_accession + '.sig')
-
-            # read in mtx signature and grab both the minhash object and the hashes in that object
-            mtx_sigobj = sourmash.load_one_signature(mtx_sigfile, ksize=ksize, select_moltype='DNA')
-            mtx_mh = from_sigobj.minhash
-            # turn the mtx hashes into a set
-            mtx_subtract_mins = set(mtx_mh.hashes)
-
-            # read in mgx signature
-            mgx_sigobj = sourmash.load_one_signature(mgx_sig_path, ksize=ksize, select_moltype='DNA')
-
-            # do the subtraction
-            mtx_subtract_mins -= set(mgx_sigobj.minhash.hashes)
-
-            # make a new signature that only contains the mtx hashes that were not in the mgx
-            mtx_subtract_mh = mtx_sigobj.minhash.copy_and_clear().flatten()
-            mtx_subtract_mh.add_many(mtx_subtract_mins)
-
-            # re-establish hash abundances from mtx sig
-            # re-read in mtx sig just in case abundances were removed in place
-            abund_sig = sourmash.load_one_signature(mtx_sig_path, ksize=ksize, select_moltype='DNA')
-            mtx_subtract_mh = mtx_subtract_mh.inflate(abund_sig.minhash)
-  
-            # create a new sig object that can be written to file
-            mtx_subtract_sigobj = sourmash.SourmashSignature(mtx_subtract_mh)
-
-            # create a name that reflects the signature contents
-            name = row['sample_name']
-            mtx_subtract_sigobj.name = name
-            
-            # create output sig file name
-            sig_filename = os.path.join('outputs/sourmash_sketch_subtract/' + name + "_k" + ksize + ".sig")
-            # write sig to file
-            with sourmash.sourmash_args.FileOutput(sig_filename, 'wt') as fp:
-                sourmash.save_signatures([mtx_subtract_sigobj], fp=fp)
-
+        mtx_sig = 'outputs/sourmash_sketch/{mtx_run_accession}.sig', 
+        mgx_sig = 'outputs/sourmash_sketch/{mgx_run_accession}.sig', 
+    output: "outputs/sourmash_sketch_subtract/{mtx_run_accession}-minus-{mgx_run_accession}-k{ksize}.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    sourmash sig subtract -k {wildcards.ksize} -o {output} -A {input.mtx_sig} {input.mtx_sig} {input.mgx_sig}
+    '''
 
