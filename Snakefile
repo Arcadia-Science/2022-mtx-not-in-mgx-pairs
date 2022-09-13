@@ -269,3 +269,11 @@ rule download_genbank_protist_lineage:
     wget -O {output} https://osf.io/2x8u4/download
     '''
 
+rule download_human_signature:
+    output: "inputs/sourmash_databases/GCF_000001405.39_GRCh38.p13_genomic.sig"
+    shell:'''
+    wget -O {output} https://osf.io/fxup3/download
+    '''
+
+rule download_euk_rna_db:
+
