@@ -92,7 +92,14 @@ rule sourmash_sig_describe_subtracted_sketches:
 rule sourmash_gather:
     input:
         sig = "outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig",
-        databases=expand("inputs/sourmash_databases/genbank-2022.03-{lineage}-k{{ksize}}.zip", lineage = LINEAGES)
+        databases=expand("inputs/sourmash_databases/genbank-2022.03-{lineage}-k{{ksize}}.zip", lineage = LINEAGES),
+        human= ,
+        cow= ,
+        sheep= ,
+        mouse= ,
+        snail= ,
+        cocoa= ,
+        beech=
     output: 
         csv="outputs/sourmash_sketch_subtract_gather/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.csv",
         un = "outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig"
@@ -269,11 +276,55 @@ rule download_genbank_protist_lineage:
     wget -O {output} https://osf.io/2x8u4/download
     '''
 
-rule download_human_signature:
-    output: "inputs/sourmash_databases/GCF_000001405.39_GRCh38.p13_genomic.sig"
+################################################################
+## Download and sketch host genomes
+################################################################
+
+rule download_and_sketch_cow:
+    output: "inputs/sourmash_databases/GCF_002263795.1_genomic.sig"
+    conda: "envs/sourmash.yml"
     shell:'''
-    wget -O {output} https://osf.io/fxup3/download
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/263/795/GCF_002263795.1_ARS-UCD1.2/GCF_002263795.1_ARS-UCD1.2_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_002263795.1_Bos_taurus -o {output} -
     '''
 
-rule download_euk_rna_db:
+rule download_and_sketch_sheep:
+    output: "inputs/sourmash_databases/GCF_002742125.1_genomic.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/742/125/GCF_002742125.1_Oar_rambouillet_v1.0/GCF_002742125.1_Oar_rambouillet_v1.0_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_002742125.1_Ovis_aries -o {output} -
+    '''
 
+rule download_and_sketch_mouse:
+    output: "inputs/sourmash_databases/GCF_000001635.26_genomic.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.26_GRCm38.p6/GCF_000001635.26_GRCm38.p6_genomic.fna.gz zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_000001635.26_Mus_musculus -o {output} -
+    '''
+
+rule download_and_sketch_cocoa:
+    output: "inputs/sourmash_databases/GCF_000208745.1_genomic.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/208/745/GCF_000208745.1_Criollo_cocoa_genome_V2/GCF_000208745.1_Criollo_cocoa_genome_V2_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_000208745.1_Theobroma_cacao -o {output} -
+    '''
+
+rule download_and_sketch_beech:
+    output: "inputs/sourmash_databases/GCA_907173295.1_genomic.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/907/173/295/GCA_907173295.1_Bhaga_Chr/GCA_907173295.1_Bhaga_Chr_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCA_907173295.1_Fagus_sylvatica -o {output} -
+    '''
+
+rule download_and_sketch_deepsea_snail:
+    output: "inputs/sourmash_databases/GCA_018857735.1_genomic.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/857/735/GCA_018857735.1_ASM1885773v1/GCA_018857735.1_ASM1885773v1_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCA_018857735.1_Alviniconcha_marisindica -o {output} -
+    '''
+
+rule download_and_sketch_human:
+    output: "inputs/sourmash_databases/GCF_000001405.40_genomic.sig"
+    conda: "envs/sourmash.yml"
+    shell:'''
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_000001405.40_Homo_sapiens -o {output} -
+    '''
