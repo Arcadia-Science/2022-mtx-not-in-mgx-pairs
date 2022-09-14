@@ -90,22 +90,31 @@ rule sourmash_sig_describe_subtracted_sketches:
 #######################################################
 
 rule sourmash_gather:
+    """
+    run sourmash gather against GenBank databases and against host genomes to classify known content in metatranscriptomes after the metagenomes have been subtracted.
+    This rule also subtracts host sequences. 
+    It subtracts all host sequences from all samples; it is very unlikely that e.g. deep sea snail genome sequences will be found in a cocoa fermentation community, so this doesn't cause problems.
+    Plus, since these are all DNA sequences, if any of-target DNA is subtracted, that still means its known and we've sequenced it before so given our question we're not interested in it.
+    Because these databases are so big, this step is performed at a scaled of 1000 instead of 200. 
+    The results should still present a relatively accurate fraction of the sample that is unknown.
+    The unassigned hashes are also output as a signature.
+    """
     input:
         sig = "outputs/sourmash_sketch_subtract/{mtx_minus_mgx}-k{ksize}.sig",
         databases=expand("inputs/sourmash_databases/genbank-2022.03-{lineage}-k{{ksize}}.zip", lineage = LINEAGES),
-        human= ,
-        cow= ,
-        sheep= ,
-        mouse= ,
-        snail= ,
-        cocoa= ,
-        beech=
+        human="inputs/sourmash_databases/GCF_000001405.40_genomic.sig",
+        cow="inputs/sourmash_databases/GCF_002263795.1_genomic.sig",
+        sheep="inputs/sourmash_databases/GCF_002742125.1_genomic.sig",
+        mouse="inputs/sourmash_databases/GCF_000001635.26_genomic.sig",
+        snail="inputs/sourmash_databases/GCA_018857735.1_genomic.sig",
+        cocoa="inputs/sourmash_databases/GCF_000208745.1_genomic.sig",
+        beech="inputs/sourmash_databases/GCA_907173295.1_genomic.sig"
     output: 
         csv="outputs/sourmash_sketch_subtract_gather/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.csv",
         un = "outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig"
     conda: "envs/sourmash.yml"
     shell:'''
-    sourmash gather -k {wildcards.ksize} --scaled 1000 --output-unassigned {output.un} --threshold-bp 0 -o {output.csv} {input.sig} {input.databases}
+    sourmash gather -k {wildcards.ksize} --scaled 1000 --output-unassigned {output.un} --threshold-bp 0 -o {output.csv} {input.sig} {input.databases} {input.human} {input.cow} {input.sheep} {input.mouse} {input.snail} {input.cocoa} {input.beech}
     '''
    
 rule gunzip_lineage_csvs:
