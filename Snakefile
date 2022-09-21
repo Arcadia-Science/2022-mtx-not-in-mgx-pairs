@@ -96,7 +96,13 @@ rule sourmash_sig_downsample:
     downsample signatures from scaled=200 to scaled=10000.
     the scaled value shouldn't impact the accuracy of the accumulation curves, and downsampling will increase speed.
     """
-
+    input: 'outputs/sourmash_sketch/{mgx_run_accession}.sig', 
+    output: 'outputs/sourmash_sketch_downsample/{mgx_run_accession}_scaled10k.sig'
+    conda: 'envs/sourmash.yml'
+    shell:'''
+    sourmash sig downsample --scaled 10000 -o {output} {input}
+    ''' 
+    
 rule sourmash_sig_filter:
     """
     filter signatures on abundance, keeping only hashes that have abundance > 1. 
