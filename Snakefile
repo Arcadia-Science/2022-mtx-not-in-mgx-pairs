@@ -109,6 +109,12 @@ rule sourmash_sig_filter:
     Most hashes with abundance 1 will be errors, and these will drive accumulation curves to not converge.
     Removing them will lead to better results
     """
+    input: 'outputs/sourmash_sketch_downsample/{mgx_run_accession}_scaled10k.sig'
+    output: 'outputs/sourmash_sketch_downsample_filtered/{mgx_run_accession}_scaled10k.sig'
+    conda: 'envs/sourmash.yml'
+    shell:'''
+    sourmash sig filter -m 2 -o {output} {input}
+    '''
 
 rule convert_sourmash_sig_to_csv:
 
