@@ -8,14 +8,16 @@ MTX = metadata['mtx_run_accession'].unique().tolist()                    # make 
 MGX = metadata['mgx_run_accession'].unique().tolist()                    # make run accession in mgx col into list
 RUN_ACCESSIONS = MGX + MTX                                               # combine mtx and mgx into one list with all run accessions
 SAMPLES = metadata['sample_name'].unique().tolist()                      # make a list of sample names
-KSIZES = [21, 31, 51]                                                    # create a list of k-mer sizes for the workflow
+KSIZES = [21]                                                            # create a list of k-mer sizes for the workflow
 MTX_MINUS_MGX = [x + '-minus-' + y for x, y in zip(MTX, MGX)]            # create list that binds mtx to mgx
+LINEAGES=['bacteria', 'viral', 'archaea', 'fungi', 'protozoa']           # set lineages for GenBank databases
 
 rule all:
     input: 
         expand("outputs/sourmash_sketch_subtract_describe/{mtx_minus_mgx}-k{ksize}.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
-        expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS)
-        un = "outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig"
+        expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS),
+        expand("outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
+        expand("outputs/sourmash_sketch_subtract_taxonomy/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.with-lineages.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
 
 ####################################################
 ## Sketch metagenomes and metatranscriptomes 
@@ -307,7 +309,7 @@ rule download_and_sketch_mouse:
     output: "inputs/sourmash_databases/GCF_000001635.26_genomic.sig"
     conda: "envs/sourmash.yml"
     shell:'''
-    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.26_GRCm38.p6/GCF_000001635.26_GRCm38.p6_genomic.fna.gz zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_000001635.26_Mus_musculus -o {output} -
+    curl https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/635/GCF_000001635.26_GRCm38.p6/GCF_000001635.26_GRCm38.p6_genomic.fna.gz | zcat | sourmash sketch dna -p k=21,k=31,k=51,scaled=200,abund --name GCF_000001635.26_Mus_musculus -o {output} -
     '''
 
 rule download_and_sketch_cocoa:
