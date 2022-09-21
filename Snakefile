@@ -87,6 +87,27 @@ rule sourmash_sig_describe_subtracted_sketches:
     '''
 
 #######################################################
+## Determine how deeply metagenomes were sequenced
+## using rarefaction/accumulation curves
+#######################################################
+
+rule sourmash_sig_downsample:
+    """
+    downsample signatures from scaled=200 to scaled=10000.
+    the scaled value shouldn't impact the accuracy of the accumulation curves, and downsampling will increase speed.
+    """
+
+rule sourmash_sig_filter:
+    """
+    filter signatures on abundance, keeping only hashes that have abundance > 1. 
+    Most hashes with abundance 1 will be errors, and these will drive accumulation curves to not converge.
+    Removing them will lead to better results
+    """
+
+rule convert_sourmash_sig_to_csv:
+
+rule specaccum:
+#######################################################
 ## Profile the taxonomy of the sequences leftover in a
 ## metatranscriptome after subtracting a metagenome
 #######################################################
