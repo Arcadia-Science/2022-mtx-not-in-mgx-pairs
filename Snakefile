@@ -117,20 +117,13 @@ rule sourmash_sig_filter:
     sourmash sig filter -m 2 -o {output} {input}
     '''
 
-rule download_sig_to_csv_script:
-    output: "scripts/sig_to_csv.py"
-    shell:'''
-    curl https://raw.githubusercontent.com/Arcadia-Science/2022-prjna853785-sourmash/main/scripts/sig_to_csv.py -o {output}
-    '''
-
 rule convert_sourmash_sig_to_csv:
     input:
-        script='scripts/sig_to_csv.py',
         sig='outputs/sourmash_sketch_downsample_filtered/{mgx_run_accession}_scaled10k.sig'
     output: 'outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled10.csv'
     conda: "envs/sourmash.yml"
     shell:'''
-    scripts/sig_to_csv.py {wildcards.ksize} {input.sig} {output}
+    scripts/sig_to_csv_abund.py {wildcards.ksize} {input.sig} {output}
     '''
 
 rule specaccum:
