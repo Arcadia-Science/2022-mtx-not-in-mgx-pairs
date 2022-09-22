@@ -18,6 +18,7 @@ rule all:
         expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS),
         #expand("outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
         #expand("outputs/sourmash_sketch_subtract_taxonomy/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.with-lineages.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
+        expand('outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled10.csv', mgx_run_accession = MGX, ksize = KSIZES)
 
 ####################################################
 ## Sketch metagenomes and metatranscriptomes 
@@ -129,7 +130,7 @@ rule convert_sourmash_sig_to_csv:
     output: 'outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled10.csv'
     conda: "envs/sourmash.yml"
     shell:'''
-    scripts/sig_to_csv.py {wildcards.ksize} {input} {output}
+    scripts/sig_to_csv.py {wildcards.ksize} {input.sig} {output}
     '''
 
 rule specaccum:
