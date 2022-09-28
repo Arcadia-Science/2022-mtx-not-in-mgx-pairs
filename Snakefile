@@ -18,7 +18,7 @@ rule all:
         expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS),
         #expand("outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
         #expand("outputs/sourmash_sketch_subtract_taxonomy/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.with-lineages.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
-        expand('outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled10.csv', mgx_run_accession = MGX, ksize = KSIZES)
+        expand('outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled100k.csv', mgx_run_accession = MGX, ksize = KSIZES)
 
 ####################################################
 ## Sketch metagenomes and metatranscriptomes 
@@ -98,10 +98,10 @@ rule sourmash_sig_downsample:
     the scaled value shouldn't impact the accuracy of the accumulation curves, and downsampling will increase speed.
     """
     input: 'outputs/sourmash_sketch/{mgx_run_accession}.sig', 
-    output: 'outputs/sourmash_sketch_downsample/{mgx_run_accession}_scaled10k.sig'
+    output: 'outputs/sourmash_sketch_downsample/{mgx_run_accession}_scaled100k.sig'
     conda: 'envs/sourmash.yml'
     shell:'''
-    sourmash sig downsample --scaled 10000 -o {output} {input}
+    sourmash sig downsample --scaled 100000 -o {output} {input}
     ''' 
     
 rule sourmash_sig_filter:
@@ -110,8 +110,8 @@ rule sourmash_sig_filter:
     Most hashes with abundance 1 will be errors, and these will drive accumulation curves to not converge.
     Removing them will lead to better results
     """
-    input: 'outputs/sourmash_sketch_downsample/{mgx_run_accession}_scaled10k.sig'
-    output: 'outputs/sourmash_sketch_downsample_filtered/{mgx_run_accession}_scaled10k.sig'
+    input: 'outputs/sourmash_sketch_downsample/{mgx_run_accession}_scaled100k.sig'
+    output: 'outputs/sourmash_sketch_downsample_filtered/{mgx_run_accession}_scaled100k.sig'
     conda: 'envs/sourmash.yml'
     shell:'''
     sourmash sig filter -m 2 -o {output} {input}
@@ -119,8 +119,8 @@ rule sourmash_sig_filter:
 
 rule convert_sourmash_sig_to_csv:
     input:
-        sig='outputs/sourmash_sketch_downsample_filtered/{mgx_run_accession}_scaled10k.sig'
-    output: 'outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled10.csv'
+        sig='outputs/sourmash_sketch_downsample_filtered/{mgx_run_accession}_scaled100k.sig'
+    output: 'outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled100k.csv'
     conda: "envs/sourmash.yml"
     shell:'''
     scripts/sig_to_csv_abund.py {wildcards.ksize} {input.sig} {output}
