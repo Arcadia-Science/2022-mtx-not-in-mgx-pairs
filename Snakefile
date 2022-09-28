@@ -135,9 +135,7 @@ rule rarefaction_analysis_of_sigs:
         tsv='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_raw_{sample_type}_k{ksize}_}scaled100k.tsv',
         slopes='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_slopes_{sample_type}_k{ksize}_scaled100k.tsv'
     conda: 'envs/tidy_vegan.R'
-    shell:'''
-    scripts/calc_rarecurves.R
-    '''
+    script:'scripts/calc_rarecurves.R'
 
 #######################################################
 ## Profile the taxonomy of the sequences leftover in a
