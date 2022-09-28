@@ -6,8 +6,6 @@ library(tibble)
 library(ggplot2)
 library(vegan)
 
-setwd("~/github/2022-mtx-not-in-mgx-pairs/")
-
 # read in metadata which maps metagenome sample accession to sample type
 # metadata <- read_tsv("inputs/metadata-paired-mgx-mtx.tsv")
 metadata <- read_tsv(snakemake@input[['metadata']])

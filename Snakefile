@@ -132,9 +132,9 @@ rule rarefaction_analysis_of_sigs:
         csvs=expand('outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{{ksize}}_scaled100k.csv', mgx_run_accession = MGX)
     output:
         pdf='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_plot_{sample_type}_k{ksize}_scaled100k.pdf',
-        tsv='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_raw_{sample_type}_k{ksize}_}scaled100k.tsv',
+        tsv='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_raw_{sample_type}_k{ksize}_scaled100k.tsv',
         slopes='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_slopes_{sample_type}_k{ksize}_scaled100k.tsv'
-    conda: 'envs/tidy_vegan.R'
+    conda: 'envs/tidy_vegan.yml'
     script:'scripts/calc_rarecurves.R'
 
 #######################################################
