@@ -3,6 +3,7 @@ library(readr)
 library(purrr)
 library(tidyr)
 library(tibble)
+library(ggplot2)
 library(vegan)
 
 setwd("~/github/2022-mtx-not-in-mgx-pairs/")
