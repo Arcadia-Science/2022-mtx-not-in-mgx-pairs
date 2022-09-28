@@ -11,14 +11,14 @@ SAMPLES = metadata['sample_name'].unique().tolist()                      # make 
 KSIZES = [21]                                                            # create a list of k-mer sizes for the workflow
 MTX_MINUS_MGX = [x + '-minus-' + y for x, y in zip(MTX, MGX)]            # create list that binds mtx to mgx
 LINEAGES=['bacteria', 'viral', 'archaea', 'fungi', 'protozoa']           # set lineages for GenBank databases
-
+SAMPLE_TYPES = metadata['sample_type'].unique().tolist()                 # make sample types a list so that the rarefaction curves can run in parallel over the wildcard
 rule all:
     input: 
         expand("outputs/sourmash_sketch_subtract_describe/{mtx_minus_mgx}-k{ksize}.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
         expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS),
         #expand("outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
         #expand("outputs/sourmash_sketch_subtract_taxonomy/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.with-lineages.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
-        expand('outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{ksize}_scaled100k.csv', mgx_run_accession = MGX, ksize = KSIZES)
+        expand('outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_plot_{sample_type}_k{ksize}_scaled100k.pdf', sample_type = SAMPLE_TYPES, ksize = KSIZES)
 
 ####################################################
 ## Sketch metagenomes and metatranscriptomes 
@@ -126,7 +126,19 @@ rule convert_sourmash_sig_to_csv:
     scripts/sig_to_csv_abund.py {wildcards.ksize} {input.sig} {output}
     '''
 
-rule specaccum:
+rule rarefaction_analysis_of_sigs:
+    input:
+        metadata = "inputs/metadata-paired-mgx-mtx.tsv",
+        csvs=expand('outputs/sourmash_sketch_downsample_filtered_csv/{mgx_run_accession}_k{{ksize}}_scaled100k.csv', mgx_run_accession = MGX)
+    output:
+        pdf='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_plot_{sample_type}_k{ksize}_scaled100k.pdf',
+        tsv='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_raw_{sample_type}_k{ksize}_}scaled100k.tsv',
+        slopes='outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_slopes_{sample_type}_k{ksize}_scaled100k.tsv'
+    conda: 'envs/tidy_vegan.R'
+    shell:'''
+    scripts/calc_rarecurves.R
+    '''
+
 #######################################################
 ## Profile the taxonomy of the sequences leftover in a
 ## metatranscriptome after subtracting a metagenome
