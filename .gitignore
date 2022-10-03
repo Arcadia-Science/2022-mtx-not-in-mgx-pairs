@@ -6,3 +6,5 @@ inputs/metadata/
 notebooks/.ipynb_checkpoints/
 outputs/
 sandbox/
+.ipynb_checkpoints/
+.Rhistory
