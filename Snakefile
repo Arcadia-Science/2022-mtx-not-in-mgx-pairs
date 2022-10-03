@@ -12,12 +12,16 @@ KSIZES = [21]                                                            # creat
 MTX_MINUS_MGX = [x + '-minus-' + y for x, y in zip(MTX, MGX)]            # create list that binds mtx to mgx
 LINEAGES=['bacteria', 'viral', 'archaea', 'fungi', 'protozoa']           # set lineages for GenBank databases
 SAMPLE_TYPES = metadata['sample_type'].unique().tolist()                 # make sample types a list so that the rarefaction curves can run in parallel over the wildcard
+
+metadata_small = pd.read_csv("inputs/metadata-selected-samples.tsv", sep = "\t") # read in subsetted samples metadata as a pandas dataframe
+MTX_MINUS_MGX_SMALL = metadata_small['subtract_pair'].unique().tolist()          # make a smaller list of samples to dig into
+
 rule all:
     input: 
         expand("outputs/sourmash_sketch_subtract_describe/{mtx_minus_mgx}-k{ksize}.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
         expand("outputs/sourmash_sketch_describe/{run_accession}.csv", run_accession = RUN_ACCESSIONS),
-        #expand("outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES),
-        #expand("outputs/sourmash_sketch_subtract_taxonomy/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.with-lineages.csv", mtx_minus_mgx = MTX_MINUS_MGX, ksize = KSIZES)
+        expand("outputs/sourmash_sketch_subtract_gather_unassigned/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}-unassigned.sig", mtx_minus_mgx = MTX_MINUS_MGX_SMALL, ksize = KSIZES),
+        expand("outputs/sourmash_sketch_subtract_taxonomy/{mtx_minus_mgx}-vs-genbank-2022.03-k{ksize}.with-lineages.csv", mtx_minus_mgx = MTX_MINUS_MGX_SMALL, ksize = KSIZES),
         expand('outputs/sourmash_sketch_downsample_filtered_rarecurves/rarecurve_plot_{sample_type}_k{ksize}_scaled100k.pdf', sample_type = SAMPLE_TYPES, ksize = KSIZES)
 
 ####################################################
