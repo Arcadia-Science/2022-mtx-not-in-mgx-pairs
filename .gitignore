@@ -1,0 +1,8 @@
+.DS_Store
+.snakemake/
+inputs/.DS_Store
+inputs/.ipynb_checkpoints/
+inputs/metadata/
+notebooks/.ipynb_checkpoints/
+outputs/
+sandbox/
